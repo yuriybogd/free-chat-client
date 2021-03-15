@@ -106,8 +106,15 @@ const RegisterSteps = (props) => {
             name, email, password, about, city
           }
       )
-      //remove current localStorage
-      localStorage.clear()
+
+      //remove current user's fields
+      localStorage.removeItem('register_name')
+      localStorage.removeItem('register_email')
+      localStorage.removeItem('register_password')
+      localStorage.removeItem('register_about')
+      localStorage.removeItem('register_city')
+      localStorage.removeItem("avatarStringType")
+
       makeToast("success", response.data.message)
       history.push("/login")
     } catch (e) {

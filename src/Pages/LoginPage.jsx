@@ -69,7 +69,9 @@ const LoginPage = (props) => {
   const emailRef = React.createRef()
   const passwordRef = React.createRef()
 
-  const loginUser = async () => {
+  const loginUser = async (e) => {
+    e.preventDefault()
+
     const email = emailRef.current.value
     const password = passwordRef.current.value
     try {
@@ -79,6 +81,7 @@ const LoginPage = (props) => {
       })
       makeToast("success", response.data.message)
       localStorage.setItem("CC_Token", response.data.token)
+      console.log("This is login's history", history)
       history.push("/dashboard")
       props.setupSocket()
     } catch (err) {

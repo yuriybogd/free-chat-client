@@ -16,14 +16,14 @@ import TextField from "@material-ui/core/TextField"
 function Copyright() {
   return (
       <Typography variant="body2" color="textSecondary" align="center">
-        {'Copyright © '}
+        {"Copyright © "}
         <Link color="inherit" href="https://material-ui.com/">
           Your Website
-        </Link>{' '}
+        </Link>{" "}
         {new Date().getFullYear()}
-        {'.'}
+        {"."}
       </Typography>
-  );
+  )
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -62,20 +62,20 @@ const DashboardPage = () => {
   const classes = useStyles()
 
   const [chatrooms, setChatrooms] = React.useState([])
-  const getChatrooms = () => {
-    axios
-        .get("http://localhost:8000/chatroom", {
-          headers: {
-            Authorization: "Bearer " + localStorage.getItem("CC_Token"),
-          },
-        })
-        .then((response) => {
-          setChatrooms(response.data)
-        })
-        .catch((err) => {
-          setTimeout(getChatrooms, 3000)
-          throw(err)
-        })
+  const getChatrooms = async () => {
+
+    try {
+      const response = await axios.get("http://localhost:8000/chatroom", {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("CC_Token"),
+        },
+      })
+      setChatrooms(response.data)
+    } catch (e) {
+      setTimeout(getChatrooms, 3000)
+      throw(e)
+    }
+
   }
 
   React.useEffect(() => {
@@ -83,33 +83,6 @@ const DashboardPage = () => {
     // eslint-disable-next-line
   }, [])
 
-  // return (
-  //     <div className="card">
-  //       <div className="cardHeader">Chatrooms</div>
-  //       <div className="cardBody">
-  //         <div className="inputGroup">
-  //           <label htmlFor="chatroomName">Chatroom Name</label>
-  //           <input
-  //               type="text"
-  //               name="chatroomName"
-  //               id="chatroomName"
-  //               placeholder="ChatterBox Nepal"
-  //           />
-  //         </div>
-  //       </div>
-  //       <button>Create Chatroom</button>
-  //       <div className="chatrooms">
-  //         {chatrooms.map((chatroom) => (
-  //             <div key={chatroom._id} className="chatroom">
-  //               <div>{chatroom.name}</div>
-  //               <Link to={"/chatroom/" + chatroom._id}>
-  //                 <div className="join">Join</div>
-  //               </Link>
-  //             </div>
-  //         ))}
-  //       </div>
-  //     </div>
-  // )
   return (
       <React.Fragment>
         <CssBaseline/>
@@ -130,7 +103,6 @@ const DashboardPage = () => {
                   name="chatroomName"
                   autoComplete="Введите название группы"
                   placeholder="Введите название группы"
-                  // inputRef={nameRef}
                   autoFocus
               />
               <div className={classes.heroButtons}>
