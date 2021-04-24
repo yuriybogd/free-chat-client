@@ -20,7 +20,6 @@ const useStyles = makeStyles((theme) => ({
 
 }))
 
-
 const RegisterPage = () => {
   const classes = useStyles()
 
@@ -29,7 +28,6 @@ const RegisterPage = () => {
         <CssBaseline/>
         <Grid item xs={false} sm={4} md={7} className={classes.image}/>
         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                  {/*здесь будут по очереди появляться компоненты регистрации*/}
             <RegisterSteps />
         </Grid>
       </Grid>
