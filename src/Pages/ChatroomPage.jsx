@@ -11,10 +11,8 @@ import DialogActions from '@material-ui/core/DialogActions'
 import Button from '@material-ui/core/Button'
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  agreeWithBadWords,
-  disagreeWithBadWords,
+  closeDialog,
   openDialog,
-  selectIsAgreeDialog,
   selectIsOpenDialog,
 } from '../features/chatroom/chatroomSlice'
 import { sendMsg } from '../features/chatroom/chatroomSlice'
@@ -34,6 +32,11 @@ const useStyles = makeStyles(() => ({
     margin: 'auto',
     border: '1px solid #eee',
     position: 'relative',
+  },
+  cardHeader: {
+    borderBottom: '1px solid grey',
+    margin: '1em',
+    textAlign: 'center',
   },
   chatroomContent: {
     position: 'absolute',
@@ -55,9 +58,6 @@ const useStyles = makeStyles(() => ({
     gridGap: '1rem',
     borderTop: '1px solid #eee',
   },
-  // chatroomActions.button: {
-  //   height: "100%",
-  // },
   message: {
     marginBottom: '0.25rem',
   },
@@ -76,45 +76,38 @@ const ChatroomPage = ({ match, socket }) => {
   const chatroomId = match.params.id
   const [messages, setMessages] = useState([])
   const [userId, setUserId] = useState('')
-  const isOpenDialog = useSelector(selectIsOpenDialog)
-  const isAgreeDialog = useSelector(selectIsAgreeDialog)
-
   const msgRef = createRef()
+  const isOpenDialog = useSelector(selectIsOpenDialog)
   const dispatch = useDispatch()
 
   const sendMessage = () => {
     const msg = msgRef.current.value
 
-    // Bad words filter
-    if (!!badWordsFilter(localStorage.getItem('regexp'), msg)) {
-      dispatch(disagreeWithBadWords())
-      dispatch(openDialog())
-    } else {
-      dispatch(sendMsg({ match, socket, msg }))
-      msgRef.current.value = ''
-    }
-  }
-
-  const handleSendByEnter = (e) => {
-    if (e.keyCode === 13) {
-      sendMessage()
+    if (msg.trim()) {
+      // Bad words filter
+      if (!!badWordsFilter(localStorage.getItem('regexp'), msg)) {
+        console.log('With bad words')
+        dispatch(openDialog())
+      } else {
+        dispatch(sendMsg({ match, socket, msg }))
+        msgRef.current.value = ''
+        console.log("without bad words")
+      }
     }
   }
 
   const handleAgree = () => {
     const msg = msgRef.current.value
-
-    dispatch(agreeWithBadWords())
     dispatch(sendMsg({ match, socket, msg }))
-
+    dispatch(closeDialog())
     msgRef.current.value = ''
-
   }
 
   const getRussianBadWords = async () => {
     if (!localStorage.getItem('regexp')) {
       try {
-        const response = await axios.get('http://localhost:3000/badWords.json')
+        const response = await axios.get(
+          'http://localhost:3000/badWords.json')
         localStorage.setItem('regexp', response.data.russian)
         console.log('[loading...]')
       } catch (e) {
@@ -166,14 +159,15 @@ const ChatroomPage = ({ match, socket }) => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title" >{'Предупреждение!'}</DialogTitle >
+        <DialogTitle
+          id="alert-dialog-title" >{'Предупреждение!'}</DialogTitle >
         <DialogContent >
           <DialogContentText id="alert-dialog-description" >
             Вы уверены, что хотите отправить сообщение с нецензурной лексикой?
           </DialogContentText >
         </DialogContent >
         <DialogActions >
-          <Button onClick={(disagreeWithBadWords())}
+          <Button onClick={() => dispatch(closeDialog())}
                   color="primary" >
             Нет, я интеллегент
           </Button >
@@ -206,7 +200,6 @@ const ChatroomPage = ({ match, socket }) => {
           <div className={classes.chatroomActions} >
             <div >
               <input
-                onKeyDown={handleSendByEnter}
                 type="text"
                 name="message"
                 placeholder="Say something!"
