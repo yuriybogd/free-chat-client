@@ -109,6 +109,7 @@ const DashboardPage = () => {
 
   React.useEffect(() => {
     getChatrooms()
+
     chatrooms.map(chatroom => {
       console.log(`Chatroom name ${chatroom.name} id ${chatroom._id}`)
     })
