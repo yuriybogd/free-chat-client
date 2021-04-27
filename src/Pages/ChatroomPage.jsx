@@ -86,25 +86,29 @@ const ChatroomPage = ({ match, socket }) => {
     const msg = msgRef.current.value
 
     // Bad words filter
-    if (!!badWordsFilter(localStorage.getItem('regexp'), msg) &&
-      isAgreeDialog) {
-      dispatch(sendMsg({ match, socket, msg }))
+    if (!!badWordsFilter(localStorage.getItem('regexp'), msg)) {
       dispatch(disagreeWithBadWords())
-      msgRef.current.value = ''
-
-    } else if (!!badWordsFilter(localStorage.getItem('regexp'), msg)) {
       dispatch(openDialog())
-
-      if (isAgreeDialog) {
-        console.log('Agree if statement, isAgreeDialog', isAgreeDialog)
-        dispatch(sendMsg({ match, socket, msg }))
-        msgRef.current.value = ''
-      }
-
     } else {
       dispatch(sendMsg({ match, socket, msg }))
       msgRef.current.value = ''
     }
+  }
+
+  const handleSendByEnter = (e) => {
+    if (e.keyCode === 13) {
+      sendMessage()
+    }
+  }
+
+  const handleAgree = () => {
+    const msg = msgRef.current.value
+
+    dispatch(agreeWithBadWords())
+    dispatch(sendMsg({ match, socket, msg }))
+
+    msgRef.current.value = ''
+
   }
 
   const getRussianBadWords = async () => {
@@ -169,11 +173,11 @@ const ChatroomPage = ({ match, socket }) => {
           </DialogContentText >
         </DialogContent >
         <DialogActions >
-          <Button onClick={() => dispatch(disagreeWithBadWords())}
+          <Button onClick={(disagreeWithBadWords())}
                   color="primary" >
             Нет, я интеллегент
           </Button >
-          <Button onClick={() => dispatch(agreeWithBadWords())} color="primary"
+          <Button onClick={handleAgree} color="primary"
                   autoFocus >
             Да, я ругаюсь
           </Button >
@@ -202,6 +206,7 @@ const ChatroomPage = ({ match, socket }) => {
           <div className={classes.chatroomActions} >
             <div >
               <input
+                onKeyDown={handleSendByEnter}
                 type="text"
                 name="message"
                 placeholder="Say something!"
