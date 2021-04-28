@@ -1,8 +1,6 @@
 import React, { createRef, useState } from 'react'
 import { withRouter } from 'react-router'
 import { makeStyles } from '@material-ui/core/styles'
-import axios from 'axios'
-import { badWordsFilter } from '../utilities/badWordsFilter'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -79,60 +77,49 @@ const ChatroomPage = ({ match, socket }) => {
   const msgRef = createRef()
   const isOpenDialog = useSelector(selectIsOpenDialog)
   const dispatch = useDispatch()
+  const [currentMsg, setCurrentMsg] = useState({})
 
   const sendMessage = () => {
     const msg = msgRef.current.value
 
     if (msg.trim()) {
-      // Bad words filter
-      if (!!badWordsFilter(localStorage.getItem('regexp'), msg)) {
-        console.log('With bad words')
-        dispatch(openDialog())
-      } else {
-        dispatch(sendMsg({ match, socket, msg }))
-        msgRef.current.value = ''
-        console.log("without bad words")
-      }
+      dispatch(sendMsg({ match, socket, msg }))
+      msgRef.current.value = ''
     }
   }
+
 
   const handleAgree = () => {
     const msg = msgRef.current.value
     dispatch(sendMsg({ match, socket, msg }))
-    dispatch(closeDialog())
     msgRef.current.value = ''
-  }
-
-  const getRussianBadWords = async () => {
-    if (!localStorage.getItem('regexp')) {
-      try {
-        const response = await axios.get(
-          'http://localhost:3000/badWords.json')
-        localStorage.setItem('regexp', response.data.russian)
-        console.log('[loading...]')
-      } catch (e) {
-        throw e
-      }
-    }
+    dispatch(closeDialog())
+    const newMessages = [...messages, currentMsg]
+    setMessages(newMessages)
   }
 
   React.useEffect(() => {
-    getRussianBadWords()
-
-    console.log('[render]')
-
     const token = localStorage.getItem('CC_Token')
+
     if (token) {
       const payload = JSON.parse(atob(token.split('.')[1]))
       setUserId(payload.id)
     }
+
     if (socket) {
       socket.on('newMessage', (message) => {
-        const newMessages = [...messages, message]
-        setMessages(newMessages)
+        // check bad words ['bad', 'words', 'bitch']
+        if (message.hasBadWords) {
+          dispatch(openDialog())
+          // current msg with bad word
+          setCurrentMsg(message)
+        } else {
+          console.log("else")
+          const newMessages = [...messages, message]
+          setMessages(newMessages)
+        }
       })
     }
-    //eslint-disable-next-line
   }, [messages])
 
   React.useEffect(() => {
@@ -149,8 +136,7 @@ const ChatroomPage = ({ match, socket }) => {
         })
       }
     }
-    //eslint-disable-next-line
-  }, [messages])
+  }, [chatroomId])
 
   return (
     <>
