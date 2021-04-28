@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
   isOpenDialog: false,
-  isAgreeDialog: false,
 }
 
 // Async Thunks
@@ -25,26 +24,17 @@ const chatroomSlice = createSlice({
   initialState,
   reducers: {
     openDialog: (state) => {state.isOpenDialog = true},
-    agreeWithBadWords: (state) => {
-      state.isAgreeDialog = true
-      state.isOpenDialog = false
-    },
-    disagreeWithBadWords: (state) => {
-      state.isAgreeDialog = false
-      state.isOpenDialog = false
-    },
+    closeDialog: (state) => {state.isOpenDialog = false},
+
   },
 })
 
 // Selectors
 export const selectIsOpenDialog = (state) => state.chatroom.isOpenDialog
-export const selectIsAgreeDialog = (state) => state.chatroom.isAgreeDialog
 
 export const {
   openDialog,
   closeDialog,
-  agreeWithBadWords,
-  disagreeWithBadWords,
 } = chatroomSlice.actions
 
 export default chatroomSlice.reducer
